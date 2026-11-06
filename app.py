@@ -27,7 +27,7 @@ source_channel = 'where_suburban_train'
 target_channel = '@GSUESPB'
 
 # ВСТАВЬ СЮДА НОВЫЙ ТОКЕН
-bot_token = '9027029313:AAG9bupAtrpaXvMaDKfJxNl-YckyGuCDdic'
+bot_token = 'ТВОЙ_НОВЫЙ_ТОКЕН_СЮДА'
 
 try:
     asyncio.get_running_loop()
@@ -60,8 +60,6 @@ async def handler(event):
 
 print("Бот запущен. Читаем твоим аккаунтом, отправляем ботом...")
 
-keep_alive()
-
 # Запускаем бота
 print("Запускаю bot_client...")
 bot_client.start(bot_token=bot_token)
@@ -74,4 +72,8 @@ with bot_client:
     bot_client.loop.run_until_complete(test_send())
 
 print("Тест завершен. Бот переходит в режим ожидания постов...")
+
+# ВОТ ОНА, В САМОМ КОНЦЕ, ПЕРЕД БЕСКОНЕЧНЫМ ЦИКЛОМ
+keep_alive() 
+
 user_client.run_until_disconnected()
