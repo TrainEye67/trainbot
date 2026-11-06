@@ -1,15 +1,36 @@
 from telethon import TelegramClient, events
 import asyncio
+import os
+from flask import Flask
+from threading import Thread
 
-# Твои данные для чтения
+# --- ЗАГЛУШКА ДЛЯ RENDER (чтобы он видел порт) ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive"
+
+def run_flask():
+    # Render передает порт через переменную PORT
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run_flask)
+    t.start()
+# -------------------------------------------------
+
+# ТВОИ ДАННЫЕ
 api_id = 34525517
 api_hash = 'ba7701494543e410242ee56ac3ae577a'
 source_channel = 'where_suburban_train'
 target_channel = 'GSUESPB'
 
-# Твой токен (взял со скрина)
-bot_token = '9027029313:AAG9bupAtrpaXvMaDKfJxNl-YckyGuCDdic'
+# ВСТАВЬ СЮДА НОВЫЙ ТОКЕН ОТ BOTFATHER
+bot_token = '9027029313:AAHsMLxcXqlZNAevA_ipeKLwmeLOSCENFHM'
 
+# Костыль для Python 3.14 (чтобы не было ошибки с event loop)
 try:
     asyncio.get_running_loop()
 except RuntimeError:
@@ -31,6 +52,11 @@ async def handler(event):
         print(f"Ошибка: {e}")
 
 print("Бот запущен. Читаем твоим аккаунтом, отправляем ботом...")
-bot_client.start(bot_token=bot_token) # Запускаем бота по токену
-user_client.start() # Запускаем твой аккаунт
+
+# Запускаем заглушку, чтобы Render не ругался на порт
+keep_alive()
+
+# Запускаем бота
+bot_client.start(bot_token=bot_token)
+user_client.start()
 user_client.run_until_disconnected()
