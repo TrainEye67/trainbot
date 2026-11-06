@@ -28,7 +28,7 @@ source_channel = 'where_suburban_train'
 target_channel = 'GSUESPB'
 
 # ВСТАВЬ СЮДА НОВЫЙ ТОКЕН ОТ BOTFATHER
-bot_token = '9027029313:AAHsMLxcXqlZNAevA_ipeKLwmeLOSCENFHM'
+bot_token = '9027029313:AAG9bupAtrpaXvMaDKfJxNl-YckyGuCDdic'
 
 # Костыль для Python 3.14 (чтобы не было ошибки с event loop)
 try:
