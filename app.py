@@ -23,7 +23,10 @@ def keep_alive():
 # ТВОИ ДАННЫЕ
 api_id = 34525517
 api_hash = 'ba7701494543e410242ee56ac3ae577a'
-source_channel = 'where_suburban_train'
+
+# ВОТ ОН, ПРАВИЛЬНЫЙ ID ДОНОРА (БЕЗ КАВЫЧЕК)
+source_channel = -1002224731616 
+
 target_channel = '@GSUESPB'
 
 # ВСТАВЬ СЮДА НОВЫЙ ТОКЕН
@@ -43,7 +46,6 @@ bot_client = TelegramClient('bot_session', api_id, api_hash)
 async def test_send():
     print("--- НАЧАЛО ТЕСТА ОТПРАВКИ ---")
     try:
-        print(f"Пытаюсь отправить сообщение в {target_channel}...")
         await bot_client.send_message(target_channel, 'Тест отправки от бота! Если ты это видишь, значит права есть.')
         print("✅ ТЕСТ ПРОЙДЕН: Бот может писать в канал!")
     except Exception as e:
@@ -52,9 +54,9 @@ async def test_send():
 @user_client.on(events.NewMessage(chats=source_channel))
 async def handler(event):
     try:
-        print(f"Поймал пост из донора: {event.message.message[:30]}...")
+        print(f"Поймал пост из донора: {event.message.message[:30] if event.message.message else 'Медиа'}...")
         await bot_client.forward_messages(target_channel, event.message)
-        print(f"Переслано ботом: {event.message.message[:30] if event.message.message else 'Медиа'}...")
+        print(f"Переслано ботом!")
     except Exception as e:
         print(f"Ошибка пересылки: {e}")
 
@@ -73,7 +75,6 @@ with bot_client:
 
 print("Тест завершен. Бот переходит в режим ожидания постов...")
 
-# ВОТ ОНА, В САМОМ КОНЦЕ, ПЕРЕД БЕСКОНЕЧНЫМ ЦИКЛОМ
 keep_alive() 
 
 user_client.run_until_disconnected()
