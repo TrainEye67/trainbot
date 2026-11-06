@@ -27,7 +27,7 @@ source_channel = 'where_suburban_train'
 target_channel = '@GSUESPB'
 
 # ВСТАВЬ СЮДА НОВЫЙ ТОКЕН
-bot_token = 'ТВОЙ_НОВЫЙ_ТОКЕН_СЮДА'
+bot_token = '9027029313:AAG9bupAtrpaXvMaDKfJxNl-YckyGuCDdic'
 
 try:
     asyncio.get_running_loop()
