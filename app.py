@@ -1,10 +1,11 @@
-from telethon import TelegramClient, events
-import asyncio
 import os
-from flask import Flask
+import asyncio
 from threading import Thread
+from flask import Flask
+from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 
-# --- ЗАГЛУШКА ДЛЯ RENDER ---
+# --- ЗАГЛУШКА ДЛЯ RENDER + UPTIMEROBOT ---
 app = Flask('')
 
 @app.route('/')
@@ -16,65 +17,47 @@ def run_flask():
     app.run(host='0.0.0.0', port=port)
 
 def keep_alive():
-    t = Thread(target=run_flask)
+    t = Thread(target=run_flask, daemon=True)
     t.start()
-# -------------------------------------------------
+# ----------------------------------------
 
-# ТВОИ ДАННЫЕ
 api_id = 34525517
-api_hash = 'ba7701494543e410242ee56ac3ae577a'
+api_hash = os.environ.get('API_HASH')
+session_str = os.environ.get('STRING_SESSION')
+bot_token = os.environ.get('BOT_TOKEN')
 
-# ВОТ ОН, ПРАВИЛЬНЫЙ ID ДОНОРА (БЕЗ КАВЫЧЕК)
-source_channel = -1002224731616 
+source_channel = 'where_suburban_train'  # Откуда пересылаем (@where_suburban_train)
+target_channel = 'GSUESPB'               # Куда пересылаем (@GSUESPB)
 
-target_channel = '@GSUESPB'
-
-# ВСТАВЬ СЮДА НОВЫЙ ТОКЕН
-bot_token = '9027029313:AAG9bupAtrpaXvMaDKfJxNl-YckyGuCDdic'
-
-try:
-    asyncio.get_running_loop()
-except RuntimeError:
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
-# 1. Клиент для чтения (твой аккаунт)
-user_client = TelegramClient('train_session', api_id, api_hash)
-
-# 2. Клиент для отправки (бот)
+user_client = TelegramClient(StringSession(session_str), api_id, api_hash)
 bot_client = TelegramClient('bot_session', api_id, api_hash)
-
-async def test_send():
-    print("--- НАЧАЛО ТЕСТА ОТПРАВКИ ---")
-    try:
-        await bot_client.send_message(target_channel, 'Тест отправки от бота! Если ты это видишь, значит права есть.')
-        print("✅ ТЕСТ ПРОЙДЕН: Бот может писать в канал!")
-    except Exception as e:
-        print(f"❌ ОШИБКА ТЕСТА: {e}")
 
 @user_client.on(events.NewMessage(chats=source_channel))
 async def handler(event):
     try:
-        print(f"Поймал пост из донора: {event.message.message[:30] if event.message.message else 'Медиа'}...")
-        await bot_client.forward_messages(target_channel, event.message)
-        print(f"Переслано ботом!")
+        preview = event.message.message[:30] if event.message.message else 'Медиа'
+        print(f"Поймал пост [{event.message.id}]: {preview}...")
+        
+        await bot_client.forward_messages(
+            entity=target_channel,
+            messages=event.message.id,
+            from_peer=source_channel
+        )
+        print(f"✅ Успешно переслано от имени бота в @{target_channel}!")
     except Exception as e:
-        print(f"Ошибка пересылки: {e}")
+        print(f"❌ Ошибка пересылки: {e}")
 
-print("Бот запущен. Читаем твоим аккаунтом, отправляем ботом...")
+async def main():
+    await bot_client.start(bot_token=bot_token)
+    await user_client.start()
+    await user_client.get_dialogs()
+    
+    print(f"🚀 Слушаем @{source_channel} -> пересылаем ботом в @{target_channel}")
+    await asyncio.gather(
+        user_client.run_until_disconnected(),
+        bot_client.run_until_disconnected()
+    )
 
-# Запускаем бота
-print("Запускаю bot_client...")
-bot_client.start(bot_token=bot_token)
-print("Запускаю user_client...")
-user_client.start()
-
-# Выполняем тестовую отправку при старте
-print("Запускаю тестовую отправку...")
-with bot_client:
-    bot_client.loop.run_until_complete(test_send())
-
-print("Тест завершен. Бот переходит в режим ожидания постов...")
-
-keep_alive() 
-
-user_client.run_until_disconnected()
+if __name__ == '__main__':
+    keep_alive()
+    asyncio.run(main())
